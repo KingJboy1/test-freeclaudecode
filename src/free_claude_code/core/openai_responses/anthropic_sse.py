@@ -1,5 +1,7 @@
 """Anthropic SSE parsing used by the Responses stream adapter."""
 
+from __future__ import annotations
+
 import json
 import sys
 from collections.abc import AsyncIterable, AsyncIterator

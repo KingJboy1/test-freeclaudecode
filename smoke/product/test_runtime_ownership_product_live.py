@@ -1,5 +1,7 @@
 """Credential-free subprocess coverage for provider generation replacement."""
 
+from __future__ import annotations
+
 import json
 import threading
 import time

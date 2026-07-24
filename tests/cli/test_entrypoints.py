@@ -1,5 +1,7 @@
 """Tests for installed CLI entrypoints, commands, and launchers."""
 
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
