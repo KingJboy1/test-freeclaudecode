@@ -1,7 +1,5 @@
 """Smoke-suite configuration loaded from the real developer environment."""
 
-from __future__ import annotations
-
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -90,7 +88,6 @@ OPENROUTER_FREE_CLI_DEFAULT_MODELS: tuple[str, ...] = (
     "openai/gpt-oss-120b:free",
     "poolside/laguna-m.1:free",
 )
-
 
 TARGET_REQUIRED_ENV: dict[str, tuple[str, ...]] = {
     "api": (),

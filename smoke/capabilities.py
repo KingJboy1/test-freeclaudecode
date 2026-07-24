@@ -482,9 +482,7 @@ CAPABILITY_CONTRACTS: tuple[CapabilityContract, ...] = (
         "Codex CLI binary and fcc provider env",
         "Responses config, auth env, and native /model catalog injection",
         "proxy preflight and catalog fail-open warning",
-        (
-            "tests/cli/test_entrypoints.py",
-        ),
+        ("tests/cli/test_entrypoints.py",),
         (),
     ),
     CapabilityContract(

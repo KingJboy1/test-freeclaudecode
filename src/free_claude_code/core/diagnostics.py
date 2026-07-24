@@ -1,7 +1,5 @@
 """Credential-safe diagnostics shared across product boundaries."""
 
-from __future__ import annotations
-
 import json
 import re
 import traceback

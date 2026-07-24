@@ -269,7 +269,6 @@ def test_create_cloudflare_provider_uses_account_scoped_base_url():
         "https://api.cloudflare.com/client/v4/accounts/test-account/ai/v1"
     )
 
-
     assert isinstance(provider, OpenAIChatProvider)
 
 

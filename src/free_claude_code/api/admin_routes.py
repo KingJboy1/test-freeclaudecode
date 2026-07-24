@@ -134,7 +134,9 @@ def _check_rate_limit(request: Request) -> None:
     now = time.monotonic()
     cutoff = now - _RATE_LIMIT_WINDOW
     # Prune stale IPs to prevent unbounded memory growth.
-    stale_ips = [ip for ip, ts in _rate_limit_hits.items() if not ts or ts[-1] <= cutoff]
+    stale_ips = [
+        ip for ip, ts in _rate_limit_hits.items() if not ts or ts[-1] <= cutoff
+    ]
     for ip in stale_ips:
         del _rate_limit_hits[ip]
     hits = _rate_limit_hits[client_host]

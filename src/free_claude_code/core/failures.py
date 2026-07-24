@@ -1,7 +1,5 @@
 """Protocol-neutral execution failure semantics."""
 
-from __future__ import annotations
-
 from dataclasses import FrozenInstanceError, dataclass
 from enum import StrEnum
 

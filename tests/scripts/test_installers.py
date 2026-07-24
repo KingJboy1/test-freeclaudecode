@@ -1,4 +1,3 @@
-from __future__ import annotations
 import os
 import shutil
 import subprocess
@@ -130,10 +129,6 @@ class PosixHarness:
 
     def add_unrelated_pi(self) -> None:
         _write_executable(self.bin_dir / "pi", _posix_command("unrelated-pi"))
-
-        prefix.mkdir(parents=True)
-        self.env["FAKE_NPM_PREFIX"] = str(prefix)
-        _write_executable(self.bin_dir / "npm", _posix_npm_command())
 
     def add_uv(self, version: str) -> None:
         _write_executable(self.bin_dir / "uv", _posix_uv_command(version))
@@ -330,7 +325,7 @@ def test_install_sh_fresh_install_is_verified(posix_harness: PosixHarness) -> No
     assert calls[-3:] == [
         "uv:tool update-shell",
         "uv:tool dir --bin",
-        "pcc-server:--version"
+        "pcc-server:--version",
     ]
 
 
@@ -452,7 +447,7 @@ def test_install_sh_replaces_prerelease_uv(
         "fcc-install",
         "path-update",
         "fcc-missing",
-        "fcc-verify"
+        "fcc-verify",
     ],
 )
 def test_install_sh_stops_without_success_on_each_failure(
@@ -620,7 +615,7 @@ def _create_windows_shortcut(
                 "$shortcut = $shell.CreateShortcut($env:FCC_TEST_SHORTCUT); "
                 "$shortcut.TargetPath = $env:FCC_TEST_TARGET; "
                 "$shortcut.Save()"
-            )
+            ),
         ],
         check=True,
         capture_output=True,
@@ -702,10 +697,6 @@ class PowerShellHarness:
     def add_unrelated_pi(self) -> None:
         _write_executable(self.bin_dir / "pi.cmd", _batch_client("unrelated-pi"))
 
-        prefix.mkdir(parents=True)
-        self.env["FAKE_NPM_PREFIX"] = str(prefix)
-        _write_executable(self.bin_dir / "npm.cmd", _batch_npm())
-
     def add_uv(self, version: str) -> None:
         _write_executable(self.bin_dir / "uv.cmd", _batch_uv(version))
 
@@ -719,7 +710,7 @@ class PowerShellHarness:
                 "Bypass",
                 "-File",
                 str(self.wrapper),
-                *args
+                *args,
             ],
             check=False,
             capture_output=True,
@@ -893,7 +884,7 @@ def test_install_ps1_fresh_install_is_verified(
     assert calls[-3:] == [
         "uv:tool update-shell",
         "uv:tool dir --bin",
-        "pcc-server:--version"
+        "pcc-server:--version",
     ]
     home = Path(powershell_harness.env["USERPROFILE"])
     app_data = Path(powershell_harness.env["APPDATA"])
@@ -985,7 +976,7 @@ def test_install_ps1_replaces_prerelease_uv(
         "fcc-install",
         "path-update",
         "fcc-missing",
-        "fcc-verify"
+        "fcc-verify",
     ],
 )
 def test_install_ps1_stops_without_success_on_each_failure(
@@ -1022,7 +1013,7 @@ def test_install_ps1_dry_run_never_executes_commands(
             "Bypass",
             "-File",
             str(_repo_root() / "scripts" / "install.ps1"),
-            "-DryRun"
+            "-DryRun",
         ],
         check=False,
         capture_output=True,
@@ -1132,7 +1123,6 @@ def test_installers_use_native_clients_and_single_python_selection() -> None:
         assert "--refresh-package" in text
         assert "update-shell" in text
         assert "--python" in text
-
 
 
 def test_readme_install_section_has_no_manual_git_prerequisite() -> None:
