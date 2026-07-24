@@ -1,4 +1,5 @@
 """Provider-owned admission, concurrency, and coordinated retry lifecycle."""
+from __future__ import annotations
 
 import asyncio
 import math
