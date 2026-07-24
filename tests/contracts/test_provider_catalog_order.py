@@ -13,8 +13,6 @@ _EXPECTED_PROVIDER_ORDER: tuple[str, ...] = (
     "deepseek",
     "mistral",
     "mistral_codestral",
-    "opencode",
-    "opencode_go",
     "vercel",
     "bedrock",
     "huggingface",

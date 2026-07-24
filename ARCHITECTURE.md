@@ -11,15 +11,14 @@ and how contributors should extend it.
 ## System Overview
 
 Free Claude Code is a local proxy for agent clients. It accepts Anthropic
-Messages traffic from Claude Code and Pi clients and OpenAI Responses traffic
-from Codex clients, routes the request to a configured upstream provider, and
+Messages traffic from Claude Code clients, routes the request to a configured upstream provider, and
 preserves the wire protocol expected by the caller.
 
 There are three runtime surfaces:
 
 - HTTP proxy: FastAPI routes expose Anthropic-compatible, Responses-compatible,
   health, model-listing, stop, and admin endpoints.
-- CLI launchers: wrapper entrypoints prepare Claude Code, Codex, and Pi sessions
+- CLI launchers: wrapper entrypoints prepare Claude Code sessions
   so they target the local proxy.
 - Messaging bridge: optional Discord or Telegram adapters turn chat messages
   into managed client CLI sessions.
@@ -27,9 +26,7 @@ There are three runtime surfaces:
 ```mermaid
 flowchart LR
     ClaudeCode[Claude Code CLI and Extensions] --> ProxyAPI[FastAPI Proxy]
-    Codex[Codex CLI and Extensions] --> ProxyAPI
-    Pi[Pi Coding Agent] --> ProxyAPI
-    AdminUI[Local Admin UI] --> ProxyAPI
+            AdminUI[Local Admin UI] --> ProxyAPI
     Bots[Discord or Telegram Bots] --> Messaging[Messaging Bridge]
     Messaging --> ClientCLI[Managed Client CLI Sessions]
     ClientCLI --> ProxyAPI
@@ -147,15 +144,13 @@ FCC optimizes for installed user workflows, not internal compatibility. The
 behavior that must be preserved is that these user-facing surfaces run correctly
 for real prompts against supported providers:
 
-- `fcc-server`, the Windows/macOS FCC Desktop shell, and the local Admin UI for
+- `pcc-server`, the Windows/macOS FCC Desktop shell, and the local Admin UI for
   configuring supported providers, model routing, auth, server tools, messaging,
   and diagnostics.
 - `fcc-claude`, Claude Code, and the Anthropic-compatible proxy behavior Claude
   Code relies on, including streaming text, native/interleaved thinking, tool
   use/results, model discovery, token counting, retries/recovery, and supported
   local server-tool behavior.
-- `fcc-codex`, Codex CLI/extensions, and the streaming OpenAI Responses behavior
-  Codex relies on, including native/interleaved reasoning, function and custom
   tool calls, generated `/model` catalog support, Responses stream lifecycle
   events, and Responses-to-Anthropic conversion at the adapter boundary.
 - `fcc-pi`, Pi, and the Anthropic-compatible proxy behavior Pi relies on,
@@ -163,7 +158,7 @@ for real prompts against supported providers:
   use/results.
 - Configured Discord and Telegram messaging bridges, including command handling,
   reply-based conversation branches, status updates, transcript rendering,
-  managed Claude/Codex task execution where configured, task stop/clear flows,
+  managed Claude task execution where configured, task stop/clear flows,
   persistence, and optional voice-note transcription.
 - Installation, update, and uninstall scripts insofar as they make the
   above workflows available on a user's machine.
@@ -209,11 +204,10 @@ new places to add unrelated behavior:
 
 Console scripts are registered in [pyproject.toml](pyproject.toml):
 
-- `fcc-server` calls `free_claude_code.cli.entrypoints:serve`.
+- `pcc-server` calls `free_claude_code.cli.entrypoints:serve`.
 - `fcc-desktop` is a GUI script calling
   `free_claude_code.cli.desktop_entrypoint:launch` on Windows and macOS.
 - `fcc-claude` calls `free_claude_code.cli.launchers.claude:launch`.
-- `fcc-codex` calls `free_claude_code.cli.launchers.codex:launch`.
 - `fcc-pi` calls `free_claude_code.cli.launchers.pi:launch`.
 
 [scripts/install.sh](scripts/install.sh) and [scripts/install.ps1](scripts/install.ps1)
@@ -223,7 +217,7 @@ per-user application bundle and desktop link. [scripts/uninstall.sh](scripts/uni
 and [scripts/uninstall.ps1](scripts/uninstall.ps1) remove those exact desktop
 artifacts, the FCC uv tool, and the managed `~/.fcc/` tree from
 [config/paths.py](src/free_claude_code/config/paths.py); they do not remove
-uv, Claude Code, Codex, Pi, or uv-managed Python runtimes. [scripts/ci.sh](scripts/ci.sh) and
+uv, Claude Code, or uv-managed Python runtimes. [scripts/ci.sh](scripts/ci.sh) and
 [scripts/ci.ps1](scripts/ci.ps1) mirror [.github/workflows/tests.yml](.github/workflows/tests.yml)
 for local pre-push verification.
 
@@ -243,7 +237,7 @@ one worker runs the same in-process `ServerSupervisor` with console output and
 automatic browser launch disabled. A second desktop launch waits for health,
 opens the existing Admin page, and exits. Tray restart delegates to the canonical
 supervisor; tray quit requests the same graceful ASGI and application-runtime
-shutdown as `fcc-server`. [cli/desktop_tray.py](src/free_claude_code/cli/desktop_tray.py)
+shutdown as `pcc-server`. [cli/desktop_tray.py](src/free_claude_code/cli/desktop_tray.py)
 owns only native status-area presentation and callbacks.
 
 [runtime/bootstrap.py](src/free_claude_code/runtime/bootstrap.py) is the single production composition function. The CLI
@@ -319,7 +313,6 @@ source detection for startup warnings also belongs to `src/free_claude_code/conf
 
 - config directory: `~/.fcc`;
 - managed env file: `~/.fcc/.env`;
-- generated Codex model catalog: `~/.fcc/codex-model-catalog.json`;
 - messaging state directory: `~/.fcc/agent_workspace`;
 - server log: `~/.fcc/logs/server.log`.
 
@@ -398,7 +391,6 @@ that one handler explicitly attaches the same ingress-owned headers.
 `MessagesHandler` validates non-empty messages, resolves models, applies
 Claude-only safety-classifier and local optimization policy, handles local web
 server tools, then streams Anthropic SSE. `ResponsesHandler` owns streaming-only
-OpenAI Responses validation and conversion for Codex clients. `TokenCountHandler`
 owns Anthropic token counting. Shared provider execution lives in
 [application/execution.py](src/free_claude_code/application/execution.py). `ProviderExecutor` resolves the narrow
 consumer-owned `ProviderPort`, synchronously preflights the upstream request,
@@ -526,10 +518,7 @@ translate reasoning. The catalog is not part of an individual provider
 generation, so a hot replacement does not erase the last useful model list.
 Discovery failures retain prior entries.
 
-Codex-specific model picker shaping stays out of this route. `fcc-codex` fetches
 the same `/v1/models` response at launch, converts FCC gateway IDs into
-provider-selectable Codex slugs, writes `~/.fcc/codex-model-catalog.json`, and
-passes it as `model_catalog_json`. Codex users open the native picker with
 `/model`; FCC does not implement a proxy-level `/models` alias.
 
 ## Provider Architecture
@@ -996,10 +985,7 @@ instead of stopping at its login gate.
 - `fcc-claude` applies the shared proxy environment without changing the user's
   Claude command arguments.
 
-[cli/launchers/codex.py](src/free_claude_code/cli/launchers/codex.py) owns the installed
-`fcc-codex` launcher:
 
-- `fcc-codex` strips official OpenAI and Codex credential variables.
 - It strips parent-only Codex thread, shell, permission, and origin context so
   each launched client owns an independent runtime identity.
 - It creates an ephemeral `fcc` model provider with `wire_api = "responses"` and
@@ -1013,8 +999,6 @@ instead of stopping at its login gate.
   `env_key` to read. This process-local variable is a client credential carrier,
   not a second FCC setting.
 
-[cli/launchers/pi.py](src/free_claude_code/cli/launchers/pi.py) owns the installed
-`fcc-pi` launcher and [cli/launchers/pi_extension.ts](src/free_claude_code/cli/launchers/pi_extension.ts)
 is its bundled Pi adapter:
 
 - Session commands load the extension from its absolute installed path and

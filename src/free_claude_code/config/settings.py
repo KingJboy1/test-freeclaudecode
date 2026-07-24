@@ -27,9 +27,6 @@ class Settings(BaseSettings):
     open_router_api_keys: str = Field(
         default="", validation_alias="OPENROUTER_API_KEYS"
     )
-    open_router_rpm_per_key: int | None = Field(
-        default=None, validation_alias="OPENROUTER_RPM_PER_KEY"
-    )
     open_router_rpm_per_key: int = Field(
         default=20, validation_alias="OPENROUTER_RPM_PER_KEY"
     )
@@ -57,7 +54,6 @@ class Settings(BaseSettings):
 
     # ==================== OpenCode Zen / OpenCode Go ====================
     # Same key from opencode.ai/auth; zen uses prefix ``opencode/``, Go uses ``opencode_go/``.
-    opencode_api_key: str = Field(default="", validation_alias="OPENCODE_API_KEY")
 
     # ==================== Vercel AI Gateway ====================
     vercel_ai_gateway_api_key: str = Field(
@@ -182,8 +178,6 @@ class Settings(BaseSettings):
     kimi_code_proxy: str = Field(default="", validation_alias="KIMI_CODE_PROXY")
     wafer_proxy: str = Field(default="", validation_alias="WAFER_PROXY")
     minimax_proxy: str = Field(default="", validation_alias="MINIMAX_PROXY")
-    opencode_proxy: str = Field(default="", validation_alias="OPENCODE_PROXY")
-    opencode_go_proxy: str = Field(default="", validation_alias="OPENCODE_GO_PROXY")
     vercel_ai_gateway_proxy: str = Field(
         default="", validation_alias="VERCEL_AI_GATEWAY_PROXY"
     )

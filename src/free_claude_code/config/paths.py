@@ -44,7 +44,3 @@ def server_log_path() -> Path:
 
     return config_dir_path() / FCC_LOGS_DIRNAME / SERVER_LOG_FILENAME
 
-
-def codex_model_catalog_path() -> Path:
-    """Return the path to the Codex model catalog file."""
-    return managed_env_path().parent / "codex_model_catalog.json"

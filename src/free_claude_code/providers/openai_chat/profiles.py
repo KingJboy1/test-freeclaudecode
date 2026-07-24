@@ -141,14 +141,6 @@ OPENAI_CHAT_PROFILES: dict[str, OpenAIChatProfile] = {
         _policy("CODESTRAL", ReasoningReplayMode.THINK_TAGS),
         NO_REASONING,
     ),
-    "opencode": OpenAIChatProfile(
-        _policy("OPENCODE", ReasoningReplayMode.THINK_TAGS),
-        NO_REASONING,
-    ),
-    "opencode_go": OpenAIChatProfile(
-        _policy("OPENCODE_GO", ReasoningReplayMode.THINK_TAGS),
-        NO_REASONING,
-    ),
     "vercel": OpenAIChatProfile(
         _policy(
             "VERCEL",

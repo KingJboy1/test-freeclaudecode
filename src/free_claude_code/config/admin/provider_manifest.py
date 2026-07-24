@@ -23,13 +23,6 @@ _PROVIDER_FIELD_OVERRIDES: dict[str, dict[str, Any]] = {
             "La Plateforme ``MISTRAL_API_KEY``. See Mistral docs for coding/FIM domains."
         ),
     },
-    "OPENCODE_API_KEY": {
-        "label": "OpenCode API Key",
-        "description": (
-            "OpenCode Zen curated gateway (opencode.ai/zen/v1) and OpenCode Go subscription "
-            "gateway (opencode.ai/zen/go/v1); single key from opencode.ai/auth."
-        ),
-    },
     "AI_GATEWAY_API_KEY": {
         "label": "Vercel AI Gateway API Key",
         "description": (

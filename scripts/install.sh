@@ -1,14 +1,12 @@
 #!/bin/sh
 set -eu
 
-REPO_ARCHIVE_URL="https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"
+REPO_ARCHIVE_URL="https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"
 PYTHON_VERSION="3.14.0"
 MIN_UV_VERSION="0.11.16"
 CLAUDE_INSTALL_URL="https://claude.ai/install.sh"
-CODEX_INSTALL_URL="https://chatgpt.com/codex/install.sh"
-PI_INSTALL_URL="https://pi.dev/install.sh"
 UV_INSTALL_URL="https://astral.sh/uv/install.sh"
-FCC_MACOS_BUNDLE_ID="io.github.alishahryar1.free-claude-code"
+FCC_MACOS_BUNDLE_ID="io.github.king-jboy.kingjboy-claude-code"
 FCC_MACOS_OWNER_FILE=".free-claude-code-owner"
 # Include retired entry points so updates reject older FCC processes before replacement.
 FCC_COMMANDS="pcc-server pcc-claude free-claude-code"
@@ -25,7 +23,7 @@ show_usage() {
     cat <<'USAGE'
 Usage: install.sh [options]
 
-Installs Claude Code, Codex, and Pi if missing, ensures a compatible uv, and installs or updates Free Claude Code.
+Ensures Claude Code is installed, ensures a compatible uv, and installs or updates Free Claude Code.
 
 Options:
   --voice-nim              Install NVIDIA NIM voice transcription support.
@@ -264,17 +262,6 @@ pi_command_is_compatible() {
     esac
 }
 
-verify_pi_command() {
-    if [ "$dry_run" -eq 1 ]; then
-        printf '+ pi --help (verify --extension and --models support)\n'
-        print_command pi --version
-        return 0
-    fi
-
-    pi_command_path=$(command -v pi 2>/dev/null) || fail "Pi was installed, but 'pi' is not available on PATH."
-    pi_command_is_compatible || fail "The 'pi' command at $pi_command_path is not a compatible Pi Coding Agent."
-    run "$pi_command_path" --version
-}
 
 ensure_claude() {
     if command -v claude >/dev/null 2>&1; then
@@ -287,32 +274,7 @@ ensure_claude() {
     verify_command claude "Claude Code"
 }
 
-ensure_codex() {
-    if command -v codex >/dev/null 2>&1; then
-        printf 'Codex already found on PATH; verifying it.\n'
-    else
-        download_and_run "$CODEX_INSTALL_URL" sh "Codex" 1
-        add_known_bin_directories
-    fi
 
-    verify_command codex "Codex"
-}
-
-ensure_pi() {
-    if [ "$dry_run" -eq 1 ] && command -v pi >/dev/null 2>&1; then
-        printf 'Pi already found on PATH; verifying it.\n'
-    elif pi_command_is_compatible; then
-        printf 'Pi already found on PATH; verifying it.\n'
-    else
-        if existing_pi_path=$(command -v pi 2>/dev/null); then
-            printf "The existing 'pi' command at %s is not Pi Coding Agent; installing Pi.\n" "$existing_pi_path"
-        fi
-        download_and_run "$PI_INSTALL_URL" sh "Pi"
-        add_pi_bin_directories
-    fi
-
-    verify_pi_command
-}
 
 current_uv_version() {
     if output=$(uv --version); then
@@ -494,7 +456,7 @@ configure_and_verify_free_claude_code() {
     if [ "$dry_run" -eq 1 ]; then
         print_command uv tool dir --bin
         printf '+ verify pcc-server and pcc-claude in the uv tool bin directory\n'
-        print_command fcc-server --version
+        print_command pcc-server --version
         return 0
     fi
 
@@ -616,12 +578,6 @@ require_command mktemp
 step "Ensuring Claude Code is installed"
 ensure_claude
 
-step "Ensuring Codex is installed"
-ensure_codex
-
-step "Ensuring Pi is installed"
-ensure_pi
-
 step "Ensuring uv $MIN_UV_VERSION or newer is installed"
 ensure_uv
 
@@ -643,7 +599,7 @@ else
         printf '\nFree Claude Code is installed and verified. Open Free Claude Code from Applications or the desktop to run it in the background.\n'
         printf 'For terminal use, start the proxy with: pcc-server\n'
     else
-        printf '\nFree Claude Code is installed and verified. Start the proxy with: fcc-server\n'
+        printf '\nFree Claude Code is installed and verified. Start the proxy with: pcc-server\n'
     fi
     printf 'Run Claude Code with: pcc-claude\n'
 fi

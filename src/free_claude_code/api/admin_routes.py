@@ -93,7 +93,7 @@ def _asset_response(filename: str) -> FileResponse:
 # A simple double-submit cookie pattern: the admin page sets a csrf_token cookie;
 # mutating requests must echo it back in the X-CSRF-Token header.
 
-_CSRF_COOKIE_NAME = "fcc_csrf_token"
+_CSRF_COOKIE_NAME = "pcc_csrf_token"
 _CSRF_HEADER_NAME = "x-csrf-token"
 
 
@@ -132,9 +132,12 @@ def _check_rate_limit(request: Request) -> None:
     """Reject admin requests that exceed the per-IP rate limit."""
     client_host = request.client.host if request.client else "unknown"
     now = time.monotonic()
-    hits = _rate_limit_hits[client_host]
-    # Prune old entries.
     cutoff = now - _RATE_LIMIT_WINDOW
+    # Prune stale IPs to prevent unbounded memory growth.
+    stale_ips = [ip for ip, ts in _rate_limit_hits.items() if not ts or ts[-1] <= cutoff]
+    for ip in stale_ips:
+        del _rate_limit_hits[ip]
+    hits = _rate_limit_hits[client_host]
     _rate_limit_hits[client_host] = hits = [t for t in hits if t > cutoff]
     if len(hits) >= _RATE_LIMIT_MAX:
         raise HTTPException(status_code=429, detail="Admin rate limit exceeded")

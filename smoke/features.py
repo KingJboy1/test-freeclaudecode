@@ -90,7 +90,6 @@ FEATURE_INVENTORY: tuple[FeatureCoverage, ...] = (
         (
             "tests/api/test_openai_responses.py",
             "tests/cli/test_entrypoints.py",
-            "tests/cli/test_codex_model_catalog.py",
             "tests/core/openai_responses/test_sse.py",
         ),
         ("test_probe_and_models_routes",),

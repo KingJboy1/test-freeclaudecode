@@ -656,18 +656,6 @@ _NON_PROVIDER_FIELDS: tuple[ConfigFieldSpec, ...] = (
         advanced=True,
     ),
     ConfigFieldSpec(
-        "FCC_SMOKE_MODEL_OPENCODE",
-        "Smoke OpenCode Zen Model",
-        "smoke",
-        advanced=True,
-    ),
-    ConfigFieldSpec(
-        "FCC_SMOKE_MODEL_OPENCODE_GO",
-        "Smoke OpenCode Go Model",
-        "smoke",
-        advanced=True,
-    ),
-    ConfigFieldSpec(
         "FCC_SMOKE_MODEL_VERCEL",
         "Smoke Vercel AI Gateway Model",
         "smoke",

@@ -27,8 +27,6 @@ LMSTUDIO_DEFAULT_BASE = "http://localhost:1234/v1"
 LLAMACPP_DEFAULT_BASE = "http://localhost:8080/v1"
 OLLAMA_DEFAULT_BASE = "http://localhost:11434"
 OLLAMA_CLOUD_DEFAULT_BASE = "https://ollama.com/v1"
-OPENCODE_DEFAULT_BASE = "https://opencode.ai/zen/v1"
-OPENCODE_GO_DEFAULT_BASE = "https://opencode.ai/zen/go/v1"
 VERCEL_AI_GATEWAY_DEFAULT_BASE = "https://ai-gateway.vercel.sh/v1"
 # Amazon Bedrock Mantle OpenAI-compatible endpoint. The base URL remains
 # configurable because API keys and model availability are region-scoped.
@@ -141,24 +139,6 @@ PROVIDER_CATALOG: dict[str, ProviderDescriptor] = {
         credential_attr="codestral_api_key",
         default_base_url=CODESTRAL_DEFAULT_BASE,
         proxy_attr="codestral_proxy",
-    ),
-    "opencode": ProviderDescriptor(
-        provider_id="opencode",
-        display_name="OpenCode Zen",
-        credential_env="OPENCODE_API_KEY",
-        credential_url="https://opencode.ai/auth",
-        credential_attr="opencode_api_key",
-        default_base_url=OPENCODE_DEFAULT_BASE,
-        proxy_attr="opencode_proxy",
-    ),
-    "opencode_go": ProviderDescriptor(
-        provider_id="opencode_go",
-        display_name="OpenCode Go",
-        credential_env="OPENCODE_API_KEY",
-        credential_url="https://opencode.ai/auth",
-        credential_attr="opencode_api_key",
-        default_base_url=OPENCODE_GO_DEFAULT_BASE,
-        proxy_attr="opencode_go_proxy",
     ),
     "vercel": ProviderDescriptor(
         provider_id="vercel",

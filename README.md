@@ -53,8 +53,6 @@ Open `http://127.0.0.1:8082/admin` (the port is printed at startup) to configure
 | [Ollama](https://ollama.com) | local | `ollama/llama3.1` |
 | [Ollama Cloud](https://ollama.com) | cloud | `ollama_cloud/llama3.1` |
 | [OpenRouter](https://openrouter.ai/keys) | cloud, vision, reasoning | `open_router/meta-llama/llama-3.1-8b-instruct` |
-| [OpenCode Zen](https://opencode.ai) | cloud | `opencode/zen-v1` |
-| [OpenCode Go](https://opencode.ai/zen/go) | cloud | `opencode_go/zen-go-v1` |
 | [SambaNova](https://sambanova.ai) | cloud | `sambanova/Meta-Llama-3.1-8B-Instruct` |
 | [Vercel AI Gateway](https://ai-gateway.vercel.sh) | proxy | `vercel/provider/model` |
 | [Google Vertex](https://cloud.google.com/vertex-ai) | cloud | `vertex/anthropic-claude-sonnet` |

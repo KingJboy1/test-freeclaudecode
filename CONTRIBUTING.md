@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Free Claude Code. Keep changes focused, test the behavior you change, and preserve the public Claude Code and Codex workflows.
+Thanks for helping improve Free Claude Code. Keep changes focused, test the behavior you change, and preserve the public Claude Code workflow.
 
 ## Before Opening A Pull Request
 
@@ -15,10 +15,10 @@ Thanks for helping improve Free Claude Code. Keep changes focused, test the beha
 Install [uv](https://docs.astral.sh/uv/) and Python 3.14, then run directly from the checkout:
 
 ```bash
-git clone https://github.com/Alishahryar1/free-claude-code.git
-cd free-claude-code
+git clone https://github.com/King-Jboy/kingjboy-claude-code.git
+cd kingjboy-claude-code
 uv python install 3.14.0
-uv run fcc-server
+uv run pcc-server
 ```
 
 Use `uv run` for Python commands. Do not run the project with a global Python interpreter.

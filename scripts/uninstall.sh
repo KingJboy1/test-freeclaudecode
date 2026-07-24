@@ -3,7 +3,7 @@ set -eu
 
 PACKAGE_NAME="free-claude-code"
 FCC_HOME_DIRNAME=".fcc"
-FCC_MACOS_BUNDLE_ID="io.github.alishahryar1.free-claude-code"
+FCC_MACOS_BUNDLE_ID="io.github.king-jboy.kingjboy-claude-code"
 FCC_MACOS_OWNER_FILE=".free-claude-code-owner"
 # Include retired entry points so older installations are fully stopped and removed.
 FCC_COMMANDS="pcc-server pcc-claude free-claude-code"
@@ -16,7 +16,7 @@ show_usage() {
 Usage: uninstall.sh [options]
 
 Removes the Free Claude Code uv tool and deletes ~/.fcc/ after removal is verified.
-Does not remove uv, Claude Code, Codex, Pi, the uv-managed Python runtime, or shared PATH entries.
+Does not remove uv, Claude Code, the uv-managed Python runtime, or shared PATH entries.
 Options:
   --dry-run                Print commands without running them.
   --help                   Show this help text.

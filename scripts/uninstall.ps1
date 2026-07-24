@@ -14,9 +14,9 @@ $FccCommands = @(
     # Include retired entry points so older installations are fully stopped and removed.
     "pcc-server",
     "pcc-claude",
-    "fcc-codex",
-    "fcc-pi",
-    "fcc-init",
+    
+    
+    
     "free-claude-code"
 )
 $script:UvPath = ""
@@ -27,7 +27,7 @@ function Show-Usage {
 Usage: uninstall.ps1 [options]
 
 Removes the Free Claude Code uv tool and deletes ~/.fcc/ after removal is verified.
-Does not remove uv, Claude Code, Codex, Pi, the uv-managed Python runtime, or shared PATH entries.
+Does not remove uv, Claude Code, the uv-managed Python runtime, or shared PATH entries.
 
 Options:
   -DryRun                Print commands without running them.

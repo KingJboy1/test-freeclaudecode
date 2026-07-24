@@ -48,8 +48,6 @@ def test_readme_provider_table_covers_full_catalog() -> None:
     assert len(prefixes) == len(set(prefixes))
     assert set(prefixes) == set(PROVIDER_CATALOG)
 
-
-def test_feature_inventory_is_unique_and_decision_complete() -> None:
     ids = [feature.feature_id for feature in FEATURE_INVENTORY]
     assert len(ids) == len(set(ids))
     assert "claude_pick" not in ids
@@ -108,7 +106,6 @@ def test_provider_and_platform_registries_include_advertised_builtins() -> None:
     assert issubclass(OpenAIChatProvider, BaseProvider)
     for provider_class in specialized_provider_classes.values():
         assert issubclass(provider_class, BaseProvider)
-
     assert create_messaging_components("not-a-platform") is None
 
 

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "free-claude-code"
 version = "4.12.0"
-description = "Local proxy connecting Claude Code and OpenCode to any AI provider"
+description = "Local proxy connecting Claude Code to any AI provider"
 readme = "README.md"
 requires-python = ">=3.14.0"
 dependencies = [

@@ -60,7 +60,7 @@ def _run_javascript(script: str) -> Any:
 def test_bug_form_requests_a_contained_version_or_none() -> None:
     form = BUG_FORM.read_text(encoding="utf-8")
 
-    assert "Run `fcc-server --version`" in form
+    assert "Run `pcc-server --version`" in form
     assert "include one version" in form
     assert "`number.number.number` format" in form
     assert "enter `None`" in form

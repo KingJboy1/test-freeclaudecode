@@ -1,4 +1,4 @@
-"""OpenAI Responses API product flow for Codex clients."""
+"""OpenAI Responses API product flow."""
 
 from fastapi.responses import JSONResponse
 

@@ -7,7 +7,7 @@ body:
     id: fcc-version
     attributes:
       label: FCC version
-      description: Run `fcc-server --version` and include one version in `number.number.number` format. If FCC did not install, enter `None`.
+      description: Run `pcc-server --version` and include one version in `number.number.number` format. If FCC did not install, enter `None`.
       placeholder: "The version is 1.22.333, or None"
     validations:
       required: true
@@ -18,9 +18,7 @@ body:
       label: CLI
       description: If the problem occurred while using a coding CLI, select it.
       options:
-        - Claude Code (fcc-claude)
-        - Codex (fcc-codex)
-        - Pi (fcc-pi)
+        - Claude Code (pcc-claude)
 
   - type: input
     id: selected-models

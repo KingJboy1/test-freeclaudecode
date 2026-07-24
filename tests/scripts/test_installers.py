@@ -130,7 +130,6 @@ class PosixHarness:
     def add_unrelated_pi(self) -> None:
         _write_executable(self.bin_dir / "pi", _posix_command("unrelated-pi"))
 
-    def add_npm_prefix(self, prefix: Path) -> None:
         prefix.mkdir(parents=True)
         self.env["FAKE_NPM_PREFIX"] = str(prefix)
         _write_executable(self.bin_dir / "npm", _posix_npm_command())
@@ -215,14 +214,12 @@ while [ "$#" -gt 0 ]; do
 done
 echo "download:$url" >> "$CALL_LOG"
 case "$url:$FAIL_STEP" in
-    *claude.ai*:claude-download|*chatgpt.com*:codex-download|*pi.dev*:pi-download|*astral.sh*:uv-download)
+    *claude.ai*:claude-download|*astral.sh*:uv-download)
         exit 41
         ;;
 esac
 case "$url" in
     *claude.ai*) source="$FAKE_FIXTURES/claude-installer.sh" ;;
-    *chatgpt.com*) source="$FAKE_FIXTURES/codex-installer.sh" ;;
-    *pi.dev*) source="$FAKE_FIXTURES/pi-installer.sh" ;;
     *astral.sh*) source="$FAKE_FIXTURES/uv-installer.sh" ;;
     *) exit 42 ;;
 esac
@@ -243,7 +240,6 @@ chmod +x "$HOME/.local/bin/claude"
         fixtures / "codex-installer.sh",
         """#!/bin/sh
 echo "codex-install:$CODEX_NON_INTERACTIVE" >> "$CALL_LOG"
-[ "$FAIL_STEP" = "codex-install" ] && exit 22
 mkdir -p "$HOME/.local/bin"
 cp "$FAKE_FIXTURES/codex-command.sh" "$HOME/.local/bin/codex"
 chmod +x "$HOME/.local/bin/codex"
@@ -252,8 +248,6 @@ chmod +x "$HOME/.local/bin/codex"
     _write_executable(
         fixtures / "pi-installer.sh",
         """#!/bin/sh
-echo "pi-install" >> "$CALL_LOG"
-[ "$FAIL_STEP" = "pi-install" ] && exit 24
 if [ -n "${FAKE_NPM_PREFIX:-}" ]; then
     pi_bin="$FAKE_NPM_PREFIX/bin"
 else
@@ -275,8 +269,6 @@ chmod +x "$HOME/.local/bin/uv"
 """,
     )
     _write_executable(fixtures / "claude-command.sh", _posix_command("claude"))
-    _write_executable(fixtures / "codex-command.sh", _posix_command("codex"))
-    _write_executable(fixtures / "pi-command.sh", _posix_command("pi"))
     _write_executable(fixtures / "uv-command.sh", _posix_uv_command("0.11.28"))
     _write_executable(
         fixtures / "fcc-command.sh",
@@ -324,14 +316,12 @@ def test_install_sh_fresh_install_is_verified(posix_harness: PosixHarness) -> No
     assert "Free Claude Code is installed and verified." in result.stdout
     calls = posix_harness.calls()
     assert calls.index("claude-install") < calls.index("claude:--version")
-    assert calls.index("codex-install:1") < calls.index("codex:--version")
-    assert calls.index("pi-install") < calls.index("pi:--version")
     assert calls.index("uv-install") < calls.index("uv:--version")
     assert any(
         call.startswith(
             "uv:tool install --force --refresh-package free-claude-code "
             "--python 3.14.0 free-claude-code @ "
-            "https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"
+            "https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"
         )
         for call in calls
     )
@@ -339,7 +329,7 @@ def test_install_sh_fresh_install_is_verified(posix_harness: PosixHarness) -> No
     assert calls[-3:] == [
         "uv:tool update-shell",
         "uv:tool dir --bin",
-        "pcc-server:--version",
+        "pcc-server:--version"
     ]
 
 
@@ -359,7 +349,7 @@ def test_install_sh_creates_native_macos_app_and_desktop_link(
     launcher = app / "Contents" / "MacOS" / "pcc-desktop"
     desktop_link = posix_harness.root / "home" / "Desktop" / "Free Claude Code.app"
     assert owner_file.read_text(encoding="utf-8").strip() == (
-        "io.github.alishahryar1.free-claude-code"
+        "io.github.king-jboy.kingjboy-claude-code"
     )
     assert "<key>LSUIElement</key>" in plist.read_text(encoding="utf-8")
     assert "<key>LSMultipleInstancesProhibited</key>" in plist.read_text(
@@ -414,8 +404,6 @@ def test_install_sh_preserves_valid_existing_tools(
     uv_version: str,
 ) -> None:
     posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_client("pi")
     posix_harness.add_uv(uv_version)
 
     result = posix_harness.run()
@@ -425,42 +413,8 @@ def test_install_sh_preserves_valid_existing_tools(
     assert "leaving it unchanged" in result.stdout
 
 
-def test_install_sh_replaces_unrelated_pi_command(
-    posix_harness: PosixHarness,
-) -> None:
-    posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_unrelated_pi()
-    posix_harness.add_uv("0.11.16")
-
-    result = posix_harness.run()
-
-    assert result.returncode == 0, result.stderr
-    assert "is not Pi Coding Agent; installing Pi" in result.stdout
-    assert "pi-install" in posix_harness.calls()
-
-
-def test_install_sh_discovers_custom_pi_npm_prefix(
-    posix_harness: PosixHarness,
-) -> None:
-    posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_npm_prefix(posix_harness.root / "custom-npm")
-    posix_harness.add_uv("0.11.16")
-
-    result = posix_harness.run()
-
-    assert result.returncode == 0, result.stderr
-    calls = posix_harness.calls()
-    assert "npm:prefix -g" in calls
-    assert "pi:--help" in calls
-    assert "pi:--version" in calls
-
-
 def test_install_sh_replaces_obsolete_uv(posix_harness: PosixHarness) -> None:
     posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_client("pi")
     posix_harness.add_uv("0.5.9")
 
     result = posix_harness.run()
@@ -476,8 +430,6 @@ def test_install_sh_replaces_prerelease_uv(
     version: str,
 ) -> None:
     posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_client("pi")
     posix_harness.add_uv(version)
 
     result = posix_harness.run()
@@ -493,19 +445,13 @@ def test_install_sh_replaces_prerelease_uv(
         "claude-download",
         "claude-install",
         "claude-verify",
-        "codex-download",
-        "codex-install",
-        "codex-verify",
-        "pi-download",
-        "pi-install",
-        "pi-verify",
         "uv-download",
         "uv-install",
         "uv-verify",
         "fcc-install",
         "path-update",
         "fcc-missing",
-        "fcc-verify",
+        "fcc-verify"
     ],
 )
 def test_install_sh_stops_without_success_on_each_failure(
@@ -520,12 +466,6 @@ def test_install_sh_stops_without_success_on_each_failure(
         "claude-download": "claude-install",
         "claude-install": "claude:--version",
         "claude-verify": "chatgpt.com",
-        "codex-download": "codex-install",
-        "codex-install": "codex:--version",
-        "codex-verify": "pi.dev",
-        "pi-download": "pi-install",
-        "pi-install": "pi:--version",
-        "pi-verify": "astral.sh",
         "uv-download": "uv-install",
         "uv-install": "uv:--version",
         "uv-verify": "uv:tool install",
@@ -563,8 +503,6 @@ def test_install_sh_rejects_unparseable_existing_uv(
     posix_harness: PosixHarness,
 ) -> None:
     posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_client("pi")
     posix_harness.add_uv("not-a-version")
 
     result = posix_harness.run()
@@ -581,7 +519,7 @@ def test_install_sh_voice_flags_only_change_fcc_spec(
     assert result.returncode == 0, result.stderr
     assert any(
         "--torch-backend cu130 free-claude-code[voice,voice_local] @ "
-        "https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"
+        "https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"
         in call
         for call in posix_harness.calls()
     )
@@ -614,8 +552,6 @@ def test_install_sh_rechecks_for_fcc_process_before_tool_replacement(
     posix_harness: PosixHarness,
 ) -> None:
     posix_harness.add_client("claude")
-    posix_harness.add_client("codex")
-    posix_harness.add_client("pi")
     posix_harness.add_uv("0.11.16")
     posix_harness.env["FCC_RUNNING_COMMAND"] = "pcc-server"
     posix_harness.env["FCC_RUNNING_PHASE"] = "late"
@@ -683,7 +619,7 @@ def _create_windows_shortcut(
                 "$shortcut = $shell.CreateShortcut($env:FCC_TEST_SHORTCUT); "
                 "$shortcut.TargetPath = $env:FCC_TEST_TARGET; "
                 "$shortcut.Save()"
-            ),
+            )
         ],
         check=True,
         capture_output=True,
@@ -738,7 +674,6 @@ if not exist "%FAKE_TOOL_BIN%" mkdir "%FAKE_TOOL_BIN%"
 copy /y "%FAKE_FIXTURES%\fcc-command.cmd" "%FAKE_TOOL_BIN%\pcc-server.cmd" >nul
 copy /y "%FAKE_FIXTURES%\fcc-command.cmd" "%FAKE_TOOL_BIN%\pcc-desktop.cmd" >nul
 copy /y "%FAKE_FIXTURES%\fcc-command.cmd" "%FAKE_TOOL_BIN%\pcc-claude.cmd" >nul
-rem Codex and Pi launchers removed
 exit /b 0
 :update_shell
 if "%FAIL_STEP%"=="path-update" exit /b 54
@@ -766,7 +701,6 @@ class PowerShellHarness:
     def add_unrelated_pi(self) -> None:
         _write_executable(self.bin_dir / "pi.cmd", _batch_client("unrelated-pi"))
 
-    def add_npm_prefix(self, prefix: Path) -> None:
         prefix.mkdir(parents=True)
         self.env["FAKE_NPM_PREFIX"] = str(prefix)
         _write_executable(self.bin_dir / "npm.cmd", _batch_npm())
@@ -784,7 +718,7 @@ class PowerShellHarness:
                 "Bypass",
                 "-File",
                 str(self.wrapper),
-                *args,
+                *args
             ],
             check=False,
             capture_output=True,
@@ -823,10 +757,6 @@ def powershell_harness(
     (fixtures / "claude-command.cmd").write_text(
         _batch_client("claude"), encoding="utf-8"
     )
-    (fixtures / "codex-command.cmd").write_text(
-        _batch_client("codex"), encoding="utf-8"
-    )
-    (fixtures / "pi-command.cmd").write_text(_batch_client("pi"), encoding="utf-8")
     (fixtures / "uv-command.cmd").write_text(_batch_uv("0.11.28"), encoding="utf-8")
     (fixtures / "fcc-command.cmd").write_text(
         """@echo off
@@ -844,24 +774,6 @@ $bin = Join-Path $env:USERPROFILE ".local\bin"
 New-Item -ItemType Directory -Force -Path $bin | Out-Null
 Copy-Item (Join-Path $env:FAKE_FIXTURES "claude-command.cmd") (Join-Path $bin "claude.cmd") -Force
 Add-Content -LiteralPath $env:CALL_LOG -Value "claude-install"
-""",
-        encoding="utf-8",
-    )
-    (fixtures / "codex-installer.ps1").write_text(
-        r"""if ($env:FAIL_STEP -eq "codex-install") { exit 62 }
-$bin = Join-Path $env:LOCALAPPDATA "Programs\OpenAI\Codex\bin"
-New-Item -ItemType Directory -Force -Path $bin | Out-Null
-Copy-Item (Join-Path $env:FAKE_FIXTURES "codex-command.cmd") (Join-Path $bin "codex.cmd") -Force
-Add-Content -LiteralPath $env:CALL_LOG -Value "codex-install:$env:CODEX_NON_INTERACTIVE"
-""",
-        encoding="utf-8",
-    )
-    (fixtures / "pi-installer.ps1").write_text(
-        r"""if ($env:FAIL_STEP -eq "pi-install") { exit 64 }
-$bin = if ($env:FAKE_NPM_PREFIX) { $env:FAKE_NPM_PREFIX } else { Join-Path $env:APPDATA "npm" }
-New-Item -ItemType Directory -Force -Path $bin | Out-Null
-Copy-Item (Join-Path $env:FAKE_FIXTURES "pi-command.cmd") (Join-Path $bin "pi.cmd") -Force
-Add-Content -LiteralPath $env:CALL_LOG -Value "pi-install"
 """,
         encoding="utf-8",
     )
@@ -886,8 +798,6 @@ function Invoke-RestMethod {
     Add-Content -LiteralPath $env:CALL_LOG -Value "download:$Uri"
     if (
         ($env:FAIL_STEP -eq "claude-download" -and $Uri.Contains("claude.ai")) -or
-        ($env:FAIL_STEP -eq "codex-download" -and $Uri.Contains("chatgpt.com")) -or
-        ($env:FAIL_STEP -eq "pi-download" -and $Uri.Contains("pi.dev")) -or
         ($env:FAIL_STEP -eq "uv-download" -and $Uri.Contains("astral.sh"))
     ) {
         throw "simulated download failure"
@@ -969,14 +879,12 @@ def test_install_ps1_fresh_install_is_verified(
     assert "Free Claude Code is installed and verified." in result.stdout
     calls = powershell_harness.calls()
     assert calls.index("claude-install") < calls.index("claude:--version")
-    assert calls.index("codex-install:1") < calls.index("codex:--version")
-    assert calls.index("pi-install") < calls.index("pi:--version")
     assert calls.index("uv-install") < calls.index("uv:--version")
     assert any(
         call.startswith(
             "uv:tool install --force --refresh-package free-claude-code "
             '--python 3.14.0 "free-claude-code @ '
-            'https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"'
+            'https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"'
         )
         for call in calls
     )
@@ -984,7 +892,7 @@ def test_install_ps1_fresh_install_is_verified(
     assert calls[-3:] == [
         "uv:tool update-shell",
         "uv:tool dir --bin",
-        "pcc-server:--version",
+        "pcc-server:--version"
     ]
     home = Path(powershell_harness.env["USERPROFILE"])
     app_data = Path(powershell_harness.env["APPDATA"])
@@ -1027,8 +935,6 @@ def test_install_ps1_preserves_valid_existing_tools(
     uv_version: str,
 ) -> None:
     powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_client("pi")
     powershell_harness.add_uv(uv_version)
 
     result = powershell_harness.run()
@@ -1038,44 +944,10 @@ def test_install_ps1_preserves_valid_existing_tools(
     assert "leaving it unchanged" in result.stdout
 
 
-def test_install_ps1_replaces_unrelated_pi_command(
-    powershell_harness: PowerShellHarness,
-) -> None:
-    powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_unrelated_pi()
-    powershell_harness.add_uv("0.11.16")
-
-    result = powershell_harness.run()
-
-    assert result.returncode == 0, result.stderr
-    assert "is not Pi Coding Agent; installing Pi" in result.stdout
-    assert "pi-install" in powershell_harness.calls()
-
-
-def test_install_ps1_discovers_custom_pi_npm_prefix(
-    powershell_harness: PowerShellHarness,
-) -> None:
-    powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_npm_prefix(powershell_harness.root / "custom-npm")
-    powershell_harness.add_uv("0.11.16")
-
-    result = powershell_harness.run()
-
-    assert result.returncode == 0, result.stderr
-    calls = powershell_harness.calls()
-    assert "npm:prefix -g" in calls
-    assert "pi:--help" in calls
-    assert "pi:--version" in calls
-
-
 def test_install_ps1_replaces_obsolete_uv(
     powershell_harness: PowerShellHarness,
 ) -> None:
     powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_client("pi")
     powershell_harness.add_uv("0.5.9")
 
     result = powershell_harness.run()
@@ -1091,8 +963,6 @@ def test_install_ps1_replaces_prerelease_uv(
     version: str,
 ) -> None:
     powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_client("pi")
     powershell_harness.add_uv(version)
 
     result = powershell_harness.run()
@@ -1108,19 +978,13 @@ def test_install_ps1_replaces_prerelease_uv(
         "claude-download",
         "claude-install",
         "claude-verify",
-        "codex-download",
-        "codex-install",
-        "codex-verify",
-        "pi-download",
-        "pi-install",
-        "pi-verify",
         "uv-download",
         "uv-install",
         "uv-verify",
         "fcc-install",
         "path-update",
         "fcc-missing",
-        "fcc-verify",
+        "fcc-verify"
     ],
 )
 def test_install_ps1_stops_without_success_on_each_failure(
@@ -1135,12 +999,6 @@ def test_install_ps1_stops_without_success_on_each_failure(
         "claude-download": "claude-install",
         "claude-install": "claude:--version",
         "claude-verify": "chatgpt.com",
-        "codex-download": "codex-install",
-        "codex-install": "codex:--version",
-        "codex-verify": "pi.dev",
-        "pi-download": "pi-install",
-        "pi-install": "pi:--version",
-        "pi-verify": "astral.sh",
         "uv-download": "uv-install",
         "uv-install": "uv:--version",
         "uv-verify": "uv:tool install",
@@ -1163,7 +1021,7 @@ def test_install_ps1_dry_run_never_executes_commands(
             "Bypass",
             "-File",
             str(_repo_root() / "scripts" / "install.ps1"),
-            "-DryRun",
+            "-DryRun"
         ],
         check=False,
         capture_output=True,
@@ -1192,8 +1050,6 @@ def test_install_ps1_rejects_unparseable_existing_uv(
     powershell_harness: PowerShellHarness,
 ) -> None:
     powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_client("pi")
     powershell_harness.add_uv("not-a-version")
 
     result = powershell_harness.run()
@@ -1210,7 +1066,7 @@ def test_install_ps1_voice_flags_only_change_fcc_spec(
     assert result.returncode == 0, result.stderr
     assert any(
         '--torch-backend cu130 "free-claude-code[voice,voice_local] @ '
-        'https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"'
+        'https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"'
         in call
         for call in powershell_harness.calls()
     )
@@ -1234,8 +1090,6 @@ def test_install_ps1_rechecks_for_fcc_process_before_tool_replacement(
     powershell_harness: PowerShellHarness,
 ) -> None:
     powershell_harness.add_client("claude")
-    powershell_harness.add_client("codex")
-    powershell_harness.add_client("pi")
     powershell_harness.add_uv("0.11.16")
     powershell_harness.env["FCC_RUNNING_COMMAND"] = "pcc-server"
     powershell_harness.env["FCC_RUNNING_PHASE"] = "late"
@@ -1267,21 +1121,17 @@ def test_installers_use_native_clients_and_single_python_selection() -> None:
         for command_name in FCC_COMMANDS:
             assert command_name in text
         assert "@anthropic-ai/claude-code" not in text
-        assert "@openai/codex" not in text
-        assert "@earendil-works/pi-coding-agent" not in text
         assert "git+" not in text
         assert "git --version" not in text
         assert (
-            "https://github.com/Alishahryar1/free-claude-code/archive/refs/heads/main.zip"
+            "https://github.com/King-Jboy/kingjboy-claude-code/archive/refs/heads/main.zip"
             in text
         )
         assert "python install" not in text
         assert "--refresh-package" in text
-        assert "tool update-shell" in text
+        assert "update-shell" in text
         assert "--python" in text
 
-    assert "https://pi.dev/install.sh" in shell
-    assert "https://pi.dev/install.ps1" in powershell
 
 
 def test_readme_install_section_has_no_manual_git_prerequisite() -> None:
