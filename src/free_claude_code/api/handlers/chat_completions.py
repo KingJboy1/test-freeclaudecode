@@ -110,7 +110,7 @@ def _chat_completions_to_messages(cc_request: dict) -> MessagesRequest:
                 tc_input = {}
                 try:
                     tc_input = json.loads(tc.get("function", {}).get("arguments", "{}"))
-                except json.JSONDecodeError, ValueError:
+                except (json.JSONDecodeError, ValueError):
                     tc_input = {}
                 anthropic_messages.append(
                     {
@@ -162,7 +162,7 @@ def _anthropic_sse_to_openai_sse(anthropic_chunk: str) -> list[str]:
 
     try:
         data = json.loads(anthropic_chunk[6:])
-    except json.JSONDecodeError, ValueError:
+    except (json.JSONDecodeError, ValueError):
         return []
 
     event_type = data.get("type", "")
@@ -290,7 +290,7 @@ class ChatCompletionsHandler:
                         full_text += delta.get("content", "")
                     if data.get("choices") and data["choices"][0].get("finish_reason"):
                         finish_reason = data["choices"][0]["finish_reason"]
-                except json.JSONDecodeError, ValueError:
+                except (json.JSONDecodeError, ValueError):
                     pass
 
         return {
